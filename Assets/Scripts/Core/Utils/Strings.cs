@@ -10,13 +10,22 @@
         
         public static class Common
         {
-            public const string LoadingText = "Loading!";
+            public const string LoadingText = "LOADING!";
         }
         
         public static class InGameUI
         {
             public const string RestartButtonText = "RESTART";
             public const string ExitButtonText = "EXIT";
+        }
+        
+        public static class Scenes
+        {
+            public const string Home = "Home";
+            public const string Game = "Game";
+            public const string Splash = "Splash";
+            public const string EndGame = "EndGame";
+            public const string Loading = "Loading";
         }
     }
 }
