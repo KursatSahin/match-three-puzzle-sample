@@ -5,14 +5,25 @@ namespace Game.Gem
 {
     public class GemData
     {
+        public Action<Point> PositionChanged; 
+        
         private Point _position;
         private GemColor _color;
         private bool _isSelected;
+        private bool _isSwapped;
+
 
         public Point Position
         {
             get => _position;
-            set => _position = value;
+            set
+            {
+                if (_position != value)
+                {
+                    _position = value;
+                    PositionChanged?.Invoke(value);
+                }
+            }
         }
 
         public GemColor Color
@@ -25,6 +36,11 @@ namespace Game.Gem
         {
             get => _isSelected;
             set => _isSelected = value;
+        }
+        public bool IsSwapped
+        {
+            get => _isSwapped;
+            set => _isSwapped = value;
         }
         
         public GemData(Point position, GemColor color)

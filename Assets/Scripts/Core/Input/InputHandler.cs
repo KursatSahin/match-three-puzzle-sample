@@ -5,7 +5,6 @@ using Core.Utils;
 using Game.Gem;
 using Lean.Touch;
 using UnityEngine;
-using Utils;
 
 namespace Core.Input
 {

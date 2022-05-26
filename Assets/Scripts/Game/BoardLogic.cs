@@ -63,5 +63,20 @@ namespace Game
             
             return gem;
         }
+        
+        public void SwapGems(Point firstGemPosition, Point secondGemPosition)
+        {
+            Board[firstGemPosition.y, firstGemPosition.x].Position = secondGemPosition;
+            Board[secondGemPosition.y, secondGemPosition.x].Position = firstGemPosition;
+            
+            var firstGemData = Board[firstGemPosition.y, firstGemPosition.x];
+            var secondGemData = Board[secondGemPosition.y, secondGemPosition.x];
+            
+            Board[firstGemPosition.y, firstGemPosition.x] = secondGemData;
+            Board[secondGemPosition.y, secondGemPosition.x] = firstGemData;
+            
+            firstGemData.IsSwapped = true;
+            secondGemData.IsSwapped = true;
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using Common;
+using Core;
 using Core.Input;
 using Game.Gem;
 using Lean.Pool;
@@ -49,6 +50,31 @@ namespace Game
         private void OnTap(GemView gemView)
         {
             Debug.Log($"Tap event received ({gemView.Data.Position})");
+            
+            if (GemView.PreviousSelected == null)
+            {
+                gemView.Select();
+            }
+            else
+            {
+                if (GemView.PreviousSelected.Data.Position == gemView.Data.Position)
+                {
+                    gemView.Deselect();
+                }
+                else
+                {
+                    if (gemView.GetAdjacents().Contains(GemView.PreviousSelected.Data.Position))
+                    {
+                        _boardLogic.SwapGems(gemView.Data.Position, GemView.PreviousSelected.Data.Position);
+                        GemView.PreviousSelected.Deselect();
+                    }
+                    else
+                    {
+                        gemView.Select();
+                    }
+                }
+            }
         }
+
     }
 }
