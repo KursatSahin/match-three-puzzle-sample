@@ -10,7 +10,7 @@
         
         public static class Common
         {
-            public const string LoadingText = "LOADING!";
+            public const string LoadingText = "Loading...";
         }
         
         public static class InGameUI

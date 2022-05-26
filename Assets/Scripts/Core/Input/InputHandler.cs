@@ -1,4 +1,8 @@
 ﻿using System;
+using Core.Event;
+using Core.Service;
+using Core.Utils;
+using Game.Gem;
 using Lean.Touch;
 using UnityEngine;
 using Utils;
@@ -7,96 +11,81 @@ namespace Core.Input
 {
     public class InputHandler : MonoBehaviour
     {
-        public static event Action<Gem> Tap;
-        public static event Action<Gem, Directions> Swipe;
-        
-        private readonly Tuple<Directions, float>[] _directionInDegrees = new Tuple<Directions, float>[4]{
-            new Tuple<Directions, float>(Directions.Up, 0f),
-            new Tuple<Directions, float>(Directions.Right, 90f),
-            new Tuple<Directions, float>(Directions.Down, 180f),
-            new Tuple<Directions, float>(Directions.Left, 270f)
-        };
+        public static event Action<GemView> Tap;
+        public static event Action<GemView, Directions> Swipe;
         
         private Camera _mainCamera;
+
+        private bool _isBlocked = false;
+        
+        private IEventDispatcher _eventDispatcher;
 
         private void Awake()
         {
             _mainCamera = Camera.main;
+            _eventDispatcher = ServiceLocator.Instance.Get<IEventDispatcher>();
         }
 
         private void OnEnable()
         {
             LeanTouch.OnFingerTap += OnFingerTap;
-            LeanTouch.OnFingerUpdate += OnFingerUpdate;
+            LeanTouch.OnFingerSwipe += OnFingerSwipe;
+            _eventDispatcher.Subscribe(GameEventType.BlockInputHandler, OnBlockInputHandler);
+            _eventDispatcher.Subscribe(GameEventType.UnblockInputHandler, OnUnblockInputHandler);
         }
-        
+
         private void OnDisable()
         {
             LeanTouch.OnFingerTap -= OnFingerTap;
-            LeanTouch.OnFingerUpdate -= OnFingerUpdate;
+            LeanTouch.OnFingerSwipe -= OnFingerSwipe;
+            _eventDispatcher.Unsubscribe(GameEventType.BlockInputHandler, OnBlockInputHandler);
+            _eventDispatcher.Unsubscribe(GameEventType.UnblockInputHandler, OnUnblockInputHandler);
         }
 
-        private void OnFingerUpdate(LeanFinger finger)
+        private void OnFingerSwipe(LeanFinger finger)
         {
-            if (finger.SwipeScreenDelta.magnitude * LeanTouch.ScalingFactor > LeanTouch.Instance.SwipeThreshold)
-            {
-                HandleFingerSwipe(finger, finger.StartScreenPosition, finger.ScreenPosition);
-            }
-        }
-
-        private void HandleFingerSwipe(LeanFinger finger, Vector2 screenFrom, Vector2 screenTo)
-        {
-            Directions swipeDirection = Directions.Down;
-            Gem gem = null;
+            if (_isBlocked) return;
             
-            var finalDelta = screenTo - screenFrom;
-
-            foreach (var directionTupple in _directionInDegrees)
-            {
-                if (AngleIsValid(finalDelta, directionTupple.Item2))
-                {
-                    swipeDirection = directionTupple.Item1;
-                    break;
-                }
-            }
+            var gemView = GetGem(finger);
+            if (gemView == null) return;
             
-            gem = GetGem(finger);
-            if (gem == null) return;
-            
-            Swipe?.Invoke(gem, swipeDirection);
-        }
-
-        private bool AngleIsValid(Vector2 vector, float requiredAngle)
-        {
-            var angle      = Mathf.Atan2(vector.x, vector.y) * Mathf.Rad2Deg;
-            var angleDelta = Mathf.DeltaAngle(angle, requiredAngle);
-
-            if (angleDelta < -45f || angleDelta >= 45f)
-            {
-                return false;
-            }
-            
-            return true;
+            var swipe = finger.SwipeScreenDelta;
+            if (swipe.x < -Mathf.Abs(swipe.y)) Swipe?.Invoke(gemView, Directions.Left);
+            if (swipe.x > Mathf.Abs(swipe.y)) Swipe?.Invoke(gemView, Directions.Right);
+            if (swipe.y < -Mathf.Abs(swipe.x)) Swipe?.Invoke(gemView, Directions.Down);
+            if (swipe.y > Mathf.Abs(swipe.x)) Swipe?.Invoke(gemView, Directions.Up);
         }
 
         private void OnFingerTap(LeanFinger finger)
         {
-            Gem gem = GetGem(finger);
-            if (gem == null) return;
+            if (_isBlocked) return;
+            
+            GemView gemView = GetGem(finger);
+            if (gemView == null) return;
 
-            Tap?.Invoke(gem);
+            Tap?.Invoke(gemView);
         }
         
-        private Gem GetGem(LeanFinger finger)
+        private GemView GetGem(LeanFinger finger)
         {
             var hit = Physics2D.Raycast(_mainCamera.ScreenPointToRay(finger.StartScreenPosition).origin, Vector2.zero);
 
-            if (hit.transform != null && hit.transform.gameObject.HasComponent<Gem>())
+            if (hit.transform != null && hit.transform.gameObject.HasComponent<GemView>())
             {
-                return hit.transform.GetComponent<Gem>();
+                return hit.transform.GetComponent<GemView>();
             }
 
             return null;
+        }
+        
+        private void OnUnblockInputHandler(IEvent e)
+        {
+            _isBlocked = false;
+        }
+
+        private void OnBlockInputHandler(IEvent e)
+        {
+            _isBlocked = true;
         }
     }
     

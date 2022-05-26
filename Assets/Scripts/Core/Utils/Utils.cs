@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
-namespace Utils
+namespace Core.Utils
 {
-    public static class Utils
+    public static class ZUtils
     {
         public static bool HasComponent<T> (this GameObject obj)
         {

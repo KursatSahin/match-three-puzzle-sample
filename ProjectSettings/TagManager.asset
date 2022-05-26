@@ -41,3 +41,30 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: UI_Back
+    uniqueID: 1378621169
+    locked: 0
+  - name: UI
+    uniqueID: 2205195313
+    locked: 0
+  - name: UI_VFX
+    uniqueID: 3282712535
+    locked: 0
+  - name: Chip
+    uniqueID: 2592876371
+    locked: 0
+  - name: Chip_VFX
+    uniqueID: 1604717433
+    locked: 0
+  - name: UI_Front
+    uniqueID: 2939103909
+    locked: 0
+  - name: UI_Front_VFX
+    uniqueID: 3057248065
+    locked: 0
+  - name: Popup
+    uniqueID: 1313340111
+    locked: 0
+  - name: Popup_VFX
+    uniqueID: 2995498193
+    locked: 0

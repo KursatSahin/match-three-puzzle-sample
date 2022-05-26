@@ -14,8 +14,6 @@ namespace Bootstrapper
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         public static void AfterAssembliesLoaded()
         {
-            Physics.autoSimulation = false;
-            Physics2D.simulationMode = SimulationMode2D.Script;
             DG.Tweening.DOTween.SetTweensCapacity(TweenersCapacity, SequencesCapacity);
             
             RegisterEventDispatcher();

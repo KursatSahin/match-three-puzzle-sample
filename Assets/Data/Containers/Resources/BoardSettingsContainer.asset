@@ -15,3 +15,4 @@ MonoBehaviour:
   boardWidth: 8
   boardHeight: 8
   colorCount: 5
+  minSolutionLength: 3

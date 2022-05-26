@@ -53,5 +53,7 @@ namespace Core.Event
         GameEnd,
         
         UpdateScore,
+        BlockInputHandler,
+        UnblockInputHandler,
     }
 }

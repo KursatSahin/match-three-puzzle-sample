@@ -7,8 +7,9 @@ namespace Containers
     public class BoardSettingsContainer : SingletonScriptableObject<BoardSettingsContainer>
     {
         [Header("BoardSettings")]
-        public int boardWidth;
-        public int boardHeight;
-        public int colorCount;
+        public int boardWidth = 8;
+        public int boardHeight = 8;
+        public int colorCount = 5;
+        public int minSolutionLength = 3;
     }
 }
