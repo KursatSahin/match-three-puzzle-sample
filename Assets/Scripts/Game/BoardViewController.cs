@@ -42,9 +42,37 @@ namespace Game
             }
         }
 
-        private void OnSwipe(GemView gemView, Directions swipeDirection)
+        private void OnSwipe(GemView gemView, Point swipeDirection)
         {
-            Debug.Log($"Swipe event received ({gemView.Data.Position})" );
+            Debug.Log($"Swipe event received ({gemView.Data.Position}) with direction => ({swipeDirection})" );
+
+            if (GemView.PreviousSelected != null)
+            {
+                GemView.PreviousSelected.Deselect();
+            }
+            
+            Point fromPosition = gemView.Data.Position;
+            Point toPosition = gemView.Data.Position + swipeDirection;
+
+            if (!IsPositionValid(toPosition))
+                return;
+            
+            _boardLogic.SwapGems(fromPosition, toPosition);
+        }
+
+        private bool IsPositionValid(Point position)
+        {
+            if (position.x < 0 || position.x >= BoardSettings.boardWidth)
+            {
+                return false;
+            }
+
+            if (position.y < 0 || position.y >= BoardSettings.boardHeight)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private void OnTap(GemView gemView)

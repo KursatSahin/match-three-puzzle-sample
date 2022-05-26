@@ -1,4 +1,5 @@
 ﻿using System;
+using Common;
 using Core.Event;
 using Core.Service;
 using Core.Utils;
@@ -11,7 +12,7 @@ namespace Core.Input
     public class InputHandler : MonoBehaviour
     {
         public static event Action<GemView> Tap;
-        public static event Action<GemView, Directions> Swipe;
+        public static event Action<GemView, Point> Swipe;
         
         private Camera _mainCamera;
 
@@ -49,10 +50,10 @@ namespace Core.Input
             if (gemView == null) return;
             
             var swipe = finger.SwipeScreenDelta;
-            if (swipe.x < -Mathf.Abs(swipe.y)) Swipe?.Invoke(gemView, Directions.Left);
-            if (swipe.x > Mathf.Abs(swipe.y)) Swipe?.Invoke(gemView, Directions.Right);
-            if (swipe.y < -Mathf.Abs(swipe.x)) Swipe?.Invoke(gemView, Directions.Down);
-            if (swipe.y > Mathf.Abs(swipe.x)) Swipe?.Invoke(gemView, Directions.Up);
+            if (swipe.x < -Mathf.Abs(swipe.y)) Swipe?.Invoke(gemView, Point.Left);
+            if (swipe.x > Mathf.Abs(swipe.y)) Swipe?.Invoke(gemView, Point.Right);
+            if (swipe.y < -Mathf.Abs(swipe.x)) Swipe?.Invoke(gemView, Point.Down);
+            if (swipe.y > Mathf.Abs(swipe.x)) Swipe?.Invoke(gemView, Point.Up);
         }
 
         private void OnFingerTap(LeanFinger finger)
