@@ -63,7 +63,6 @@ namespace Game
                 return;
 
             _isRollBackNeeded = true;
-            _isBoardModified = false;
             
             var modifiedGems = GetModifiedGems();
             
@@ -138,8 +137,45 @@ namespace Game
                     }
                 }
             }
-            // This line added for testing  one move
+        }
+
+        public void FillEmptySlots()
+        {
+            HashSet<int> emptyColumns = new HashSet<int>();
+            foreach (var destroyedGem in _destroyedCollector)
+            {
+                emptyColumns.Add(destroyedGem.Position.x);
+            }
+
+            if (emptyColumns.Count < 1)
+                return;
+
+            foreach (var column in emptyColumns)
+            {
+                var generatorRowIndex = _boardSettings.boardHeight;
+
+                for (int row = 0; row < _boardSettings.boardHeight; row++)
+                {
+                    var gemData = Board[row, column];
+
+                    if (gemData == null)
+                    {
+                        gemData = CreateGem(column, row);
+                        gemData.Position = new Point(column, generatorRowIndex++);
+
+                        Board[row, column] = gemData;
+                        
+                        _boardViewController.GenerateGemView(gemData);
+
+                        gemData.Position = new Point(column, row);
+                        
+                        gemData.IsModified = true;
+                    }
+                }
+            }
+            
             _destroyedCollector.Clear();
+            _isBoardModified = true;
         }
 
         private void GenerateBoard(int boardWidth, int boardHeight)
@@ -153,14 +189,14 @@ namespace Game
             {
                 for (int col = 0; col < boardWidth; col++)
                 {
-                    Board[row, col] = CreateGem(col, row);
+                    Board[row, col] = CreatePossibleGem(col, row);
                 }
             }
             
             _boardViewController.GenerateBoardView();
         }
 
-        private GemData CreateGem(int col, int row)
+        private GemData CreatePossibleGem(int col, int row)
         {
             var possibleGemColors = new List<int>();
             possibleGemColors.AddRange(_gemColors);
@@ -172,6 +208,14 @@ namespace Game
             
             _previousLeft[col] = validGemColor;
             _previousBelow = validGemColor;
+            
+            return gem;
+        }
+        
+        private GemData CreateGem(int col, int row)
+        {
+            var validGemColor = _gemColors[Random.Range(0, _gemColors.Count)];
+            var gem = new GemData(new Point(col, row), (GemColor)validGemColor);
             
             return gem;
         }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Common;
 using Containers;
@@ -35,7 +36,12 @@ namespace Game.Gem
         {
             _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         }
-    
+
+        private void OnDisable()
+        {
+            _spriteRenderer.color = _defaultColor;
+        }
+
         #endregion
 
         public void SetGemData (GemData data)
@@ -60,18 +66,20 @@ namespace Game.Gem
 
         private void OnDestroyGem()
         {
-            Sequence destroySequence = DOTween.Sequence().Pause();
+            Sequence destroySequence = DOTween.Sequence().Pause().SetLink(gameObject);
             destroySequence.Append(_spriteRenderer.DOFade(0, 0.4f));
             destroySequence.OnComplete(() =>
+            {
+                LeanPool.Despawn(gameObject);
+            });
+            destroySequence.OnStart((() =>
             {
                 Data.PositionChanged -= OnPositionChanged;
                 Data.DestroyGem -= OnDestroyGem;
 
                 Data = null;
-                
-                LeanPool.Despawn(gameObject);
-            });
-            
+            }));
+
             _animationManager.Enqueue(AnimGroup.Destroy, destroySequence);
         }
 

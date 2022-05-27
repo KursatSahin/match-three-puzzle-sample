@@ -34,7 +34,7 @@ namespace Game
             }
         }
 
-        private void GenerateGemView(GemData gemData)
+        public void GenerateGemView(GemData gemData)
         {
             if (LeanPool.Spawn(_gemPrefab, _gemParentContainer, true).TryGetComponent(out GemView gemView))
             {
@@ -46,7 +46,7 @@ namespace Game
         {
             _boardLogic.FindMatchesAndClear();
             _boardLogic.SettleBoard();
-            
+            _boardLogic.FillEmptySlots();
         }
 
         private void OnSwipe(GemView gemView, Point swipeDirection)

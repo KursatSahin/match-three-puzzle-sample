@@ -169,8 +169,8 @@ MonoBehaviour:
   prefab: {fileID: 8694728285484863556, guid: 63f5a5a0e0c903d4f8b9363e2837ec25, type: 3}
   notification: 3
   strategy: 0
-  preload: 74
-  capacity: 100
+  preload: 96
+  capacity: 128
   recycle: 0
   persist: 0
   stamp: 0
