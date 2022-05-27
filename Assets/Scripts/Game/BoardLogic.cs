@@ -33,40 +33,6 @@ namespace Game
             GenerateBoard(_boardSettings.boardWidth, _boardSettings.boardHeight);
         }
         
-        private void GenerateBoard(int boardWidth, int boardHeight)
-        {
-            Board = new GemData[boardHeight, boardWidth];
-            
-            _previousLeft = new int[boardHeight];
-            _previousBelow = -1;
-            
-            for (int row = 0; row < boardHeight; row++)
-            {
-                for (int col = 0; col < boardWidth; col++)
-                {
-                    Board[row, col] = CreateGem(col, row);
-                }
-            }
-            
-            _boardViewController.GenerateBoardView();
-        }
-
-        private GemData CreateGem(int col, int row)
-        {
-            var possibleGemColors = new List<int>();
-            possibleGemColors.AddRange(_gemColors);
-            possibleGemColors.Remove(_previousLeft[col]);
-            possibleGemColors.Remove(_previousBelow);
-
-            var validGemColor = possibleGemColors[Random.Range(0, possibleGemColors.Count)];
-            var gem = new GemData(new Point(col, row), (GemColor)validGemColor);
-            
-            _previousLeft[col] = validGemColor;
-            _previousBelow = validGemColor;
-            
-            return gem;
-        }
-        
         public void SwapGems(GemData firstGem, GemData secondGem)
         {
             Board[firstGem.Position.y, firstGem.Position.x] = secondGem;
@@ -131,7 +97,85 @@ namespace Game
 
             _isBoardModified = false;
         }
+        
+        public void SettleBoard()
+        {
+            HashSet<int> fallingColumns = new HashSet<int>();
+            foreach (var destroyedGem in _destroyedCollector)
+            {
+                fallingColumns.Add(destroyedGem.Position.x);
+            }
 
+            if (fallingColumns.Count < 1)
+                return;
+
+            foreach (var column in fallingColumns)
+            {
+                int fallingDistance = 0;
+
+                // Traverse the column from bottom to top
+                for (int row = 0; row < _boardSettings.boardHeight; row++)
+                {
+                    var gemData = Board[row, column];
+
+                    if (gemData.Destroyed)
+                    {
+                        Board[row, column] = null;
+                        fallingDistance++;
+                    }
+                    else
+                    {
+                        if (fallingDistance > 0)
+                        {
+                            Point landingPosition = new Point( column, row - fallingDistance );
+                            
+                            Board[landingPosition.y, landingPosition.x] = gemData;
+                            Board[row, column] = null;
+                            
+                            gemData.Position = landingPosition;
+                            gemData.IsModified = true;
+                        }
+                    }
+                }
+            }
+            // This line added for testing  one move
+            _destroyedCollector.Clear();
+        }
+
+        private void GenerateBoard(int boardWidth, int boardHeight)
+        {
+            Board = new GemData[boardHeight, boardWidth];
+            
+            _previousLeft = new int[boardHeight];
+            _previousBelow = -1;
+            
+            for (int row = 0; row < boardHeight; row++)
+            {
+                for (int col = 0; col < boardWidth; col++)
+                {
+                    Board[row, col] = CreateGem(col, row);
+                }
+            }
+            
+            _boardViewController.GenerateBoardView();
+        }
+
+        private GemData CreateGem(int col, int row)
+        {
+            var possibleGemColors = new List<int>();
+            possibleGemColors.AddRange(_gemColors);
+            possibleGemColors.Remove(_previousLeft[col]);
+            possibleGemColors.Remove(_previousBelow);
+
+            var validGemColor = possibleGemColors[Random.Range(0, possibleGemColors.Count)];
+            var gem = new GemData(new Point(col, row), (GemColor)validGemColor);
+            
+            _previousLeft[col] = validGemColor;
+            _previousBelow = validGemColor;
+            
+            return gem;
+        }
+        
         private bool CheckGemForMatch(GemData gem, List<GemData> result)
         {
             var current = gem;

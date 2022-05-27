@@ -45,6 +45,7 @@ namespace Game
         public void RunLogic()
         {
             _boardLogic.FindMatchesAndClear();
+            _boardLogic.SettleBoard();
             
         }
 
