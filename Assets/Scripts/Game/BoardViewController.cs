@@ -41,6 +41,12 @@ namespace Game
                 gemView.SetGemData(gemData);
             }
         }
+        
+        public void RunLogic()
+        {
+            _boardLogic.FindMatchesAndClear();
+            
+        }
 
         private void OnSwipe(GemView gemView, Point swipeDirection)
         {

@@ -3,6 +3,7 @@ using Common;
 using Containers;
 using Core.Service;
 using DG.Tweening;
+using Lean.Pool;
 using UnityEngine;
 using Utils;
 using static Containers.ContainerFacade;
@@ -58,6 +59,14 @@ namespace Game.Gem
             transform.position = _boardDrawHelper.GetWorldPosition(data.Position.x, data.Position.y);
             
             Data.PositionChanged += OnPositionChanged;
+            Data.DestroyGem += OnDestroyGem;
+        }
+
+        private void OnDestroyGem()
+        {
+            Data.PositionChanged -= OnPositionChanged;
+            Data.DestroyGem -= OnDestroyGem;
+            LeanPool.Despawn(gameObject);
         }
 
         private void OnPositionChanged(Point position)

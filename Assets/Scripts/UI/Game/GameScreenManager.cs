@@ -33,6 +33,11 @@ namespace UI.Game
             _boardViewController = new BoardViewController(_gemParentContainer);
         }
 
+        private void Update()
+        {
+            _boardViewController.RunLogic();
+        }
+
         #endregion
     }
 }

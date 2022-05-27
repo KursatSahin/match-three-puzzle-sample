@@ -5,12 +5,14 @@ namespace Game.Gem
 {
     public class GemData
     {
-        public Action<Point> PositionChanged; 
+        public Action<Point> PositionChanged;
+        public Action DestroyGem;
         
         private Point _position;
         private GemColor _color;
         private bool _isSelected;
         private bool _isSwapped;
+        private bool _destroyed;
 
 
         public Point Position
@@ -22,6 +24,22 @@ namespace Game.Gem
                 {
                     _position = value;
                     PositionChanged?.Invoke(value);
+                }
+            }
+        }
+        
+        public bool Destroyed
+        {
+            get => _destroyed;
+            set
+            {
+                if (_destroyed == value) return;
+
+                _destroyed = value;
+                
+                if (value)
+                {
+                    DestroyGem?.Invoke();
                 }
             }
         }
