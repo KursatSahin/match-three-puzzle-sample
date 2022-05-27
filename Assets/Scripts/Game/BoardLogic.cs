@@ -83,6 +83,18 @@ namespace Game
             
             _isBoardModified = true;
         }
+        
+        public void RollBack(Point firstGemPosition, Point secondGemPosition)
+        {
+            Board[firstGemPosition.y, firstGemPosition.x].Position = secondGemPosition;
+            Board[secondGemPosition.y, secondGemPosition.x].Position = firstGemPosition;
+
+            var firstGemData = Board[firstGemPosition.y, firstGemPosition.x];
+            var secondGemData = Board[secondGemPosition.y, secondGemPosition.x];
+
+            Board[firstGemPosition.y, firstGemPosition.x] = secondGemData;
+            Board[secondGemPosition.y, secondGemPosition.x] = firstGemData;
+        }
 
         private List<GemData> destroyedCollector = new List<GemData>();
 
@@ -114,11 +126,15 @@ namespace Game
                     
                     _isRollBackNeeded = false;
                 }
-                else
-                {
-                    // rollback
-                }
+                
+                gem.IsSwapped = false;
             }
+
+            if (_isRollBackNeeded)
+            {
+                RollBack(modifiedGems[0].Position, modifiedGems[1].Position);
+            }
+
         }
 
         private bool CheckGemForMatch(GemData gem, List<GemData> result)
