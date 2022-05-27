@@ -57,13 +57,12 @@ namespace Game
                 GemView.PreviousSelected.Deselect();
             }
             
-            Point fromPosition = gemView.Data.Position;
             Point toPosition = gemView.Data.Position + swipeDirection;
 
             if (!IsPositionValid(toPosition))
                 return;
             
-            _boardLogic.SwapGems(fromPosition, toPosition);
+            _boardLogic.SwapGems(gemView.Data, _boardLogic.Board[toPosition.y, toPosition.x]);
         }
 
         private bool IsPositionValid(Point position)
@@ -99,7 +98,7 @@ namespace Game
                 {
                     if (gemView.GetAdjacents().Contains(GemView.PreviousSelected.Data.Position))
                     {
-                        _boardLogic.SwapGems(gemView.Data.Position, GemView.PreviousSelected.Data.Position);
+                        _boardLogic.SwapGems(gemView.Data, GemView.PreviousSelected.Data);
                         GemView.PreviousSelected.Deselect();
                     }
                     else

@@ -13,7 +13,7 @@ namespace Game.Gem
         private bool _isSelected;
         private bool _isSwapped;
         private bool _destroyed;
-
+        private bool _isModified;
 
         public Point Position
         {
@@ -55,10 +55,17 @@ namespace Game.Gem
             get => _isSelected;
             set => _isSelected = value;
         }
+
         public bool IsSwapped
         {
             get => _isSwapped;
             set => _isSwapped = value;
+        }
+        
+        public bool IsModified
+        {
+            get => _isModified;
+            set => _isModified = value;
         }
         
         public GemData(Point position, GemColor color)

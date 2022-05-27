@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Common;
 using Containers;
-using Core.Utils;
 using Game.Gem;
 using UnityEngine;
 
@@ -13,11 +12,12 @@ namespace Game
         
         private BoardSettingsContainer _boardSettings;
         private BoardViewController _boardViewController;
+        private List<GemData> _destroyedCollector = new List<GemData>();
 
         private List<int> _gemColors = new List<int>() {0, 1, 2, 3, 4};
 
-        private int[] previousLeft;
-        private int previousBelow;
+        private int[] _previousLeft;
+        private int _previousBelow;
         
         private bool _isBoardModified = false;
         private bool _isRollBackNeeded = true;
@@ -37,8 +37,8 @@ namespace Game
         {
             Board = new GemData[boardHeight, boardWidth];
             
-            previousLeft = new int[boardHeight];
-            previousBelow = -1;
+            _previousLeft = new int[boardHeight];
+            _previousBelow = -1;
             
             for (int row = 0; row < boardHeight; row++)
             {
@@ -55,48 +55,41 @@ namespace Game
         {
             var possibleGemColors = new List<int>();
             possibleGemColors.AddRange(_gemColors);
-            possibleGemColors.Remove(previousLeft[col]);
-            possibleGemColors.Remove(previousBelow);
+            possibleGemColors.Remove(_previousLeft[col]);
+            possibleGemColors.Remove(_previousBelow);
 
             var validGemColor = possibleGemColors[Random.Range(0, possibleGemColors.Count)];
             var gem = new GemData(new Point(col, row), (GemColor)validGemColor);
             
-            previousLeft[col] = validGemColor;
-            previousBelow = validGemColor;
+            _previousLeft[col] = validGemColor;
+            _previousBelow = validGemColor;
             
             return gem;
         }
         
-        public void SwapGems(Point firstGemPosition, Point secondGemPosition)
+        public void SwapGems(GemData firstGem, GemData secondGem)
         {
-            Board[firstGemPosition.y, firstGemPosition.x].Position = secondGemPosition;
-            Board[secondGemPosition.y, secondGemPosition.x].Position = firstGemPosition;
+            Board[firstGem.Position.y, firstGem.Position.x] = secondGem;
+            Board[secondGem.Position.y, secondGem.Position.x] = firstGem;
+         
+            firstGem.IsSwapped = true;
+            secondGem.IsSwapped = true;
             
-            var firstGemData = Board[firstGemPosition.y, firstGemPosition.x];
-            var secondGemData = Board[secondGemPosition.y, secondGemPosition.x];
-            
-            Board[firstGemPosition.y, firstGemPosition.x] = secondGemData;
-            Board[secondGemPosition.y, secondGemPosition.x] = firstGemData;
-            
-            firstGemData.IsSwapped = true;
-            secondGemData.IsSwapped = true;
+            (firstGem.Position, secondGem.Position) = (secondGem.Position, firstGem.Position);
+
+            firstGem.IsModified = true;
+            secondGem.IsModified = true;
             
             _isBoardModified = true;
         }
         
-        public void RollBack(Point firstGemPosition, Point secondGemPosition)
+        public void RollBack(GemData firstGem, GemData secondGem)
         {
-            Board[firstGemPosition.y, firstGemPosition.x].Position = secondGemPosition;
-            Board[secondGemPosition.y, secondGemPosition.x].Position = firstGemPosition;
+            Board[firstGem.Position.y, firstGem.Position.x] = secondGem;
+            Board[secondGem.Position.y, secondGem.Position.x] = firstGem;
 
-            var firstGemData = Board[firstGemPosition.y, firstGemPosition.x];
-            var secondGemData = Board[secondGemPosition.y, secondGemPosition.x];
-
-            Board[firstGemPosition.y, firstGemPosition.x] = secondGemData;
-            Board[secondGemPosition.y, secondGemPosition.x] = firstGemData;
+            (firstGem.Position, secondGem.Position) = (secondGem.Position, firstGem.Position);
         }
-
-        private List<GemData> destroyedCollector = new List<GemData>();
 
         public void FindMatchesAndClear()
         {
@@ -121,20 +114,22 @@ namespace Game
                     foreach (var gemData in mathedGems)
                     {
                         gemData.Destroyed = true;
-                        destroyedCollector.Add(gemData);
+                        _destroyedCollector.Add(gemData);
                     }
-                    
-                    _isRollBackNeeded = false;
                 }
+
+                _isRollBackNeeded = _isRollBackNeeded && (gem.IsSwapped && !isMatchFound);;
                 
                 gem.IsSwapped = false;
+                gem.IsModified = false;
             }
 
             if (_isRollBackNeeded)
             {
-                RollBack(modifiedGems[0].Position, modifiedGems[1].Position);
+                RollBack(modifiedGems[0], modifiedGems[1]);
             }
 
+            _isBoardModified = false;
         }
 
         private bool CheckGemForMatch(GemData gem, List<GemData> result)
@@ -211,15 +206,14 @@ namespace Game
                 CheckGemForMatchHelper(next, direction, result);
             }
         }
-
-
+        
         private List<GemData> GetModifiedGems()
         {
             var result = new List<GemData>();
 
             foreach (var gem in Board)
             {
-                if (gem.IsSwapped)
+                if (gem.IsModified)
                 {
                     result.Add(gem);
                 }

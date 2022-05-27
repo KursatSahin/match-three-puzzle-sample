@@ -1,3 +1,4 @@
+using Core.Animation;
 using Core.Animation.Interfaces;
 using Core.Service;
 using Game;
@@ -30,12 +31,21 @@ namespace UI.Game
         {
             var boardDrawHelper = new BoardDrawHelper(_boardPivotPoint);
             ServiceLocator.Instance.RegisterService<IBoardDrawHelper>(boardDrawHelper);
+
+            _animationManager = new AnimationManager();
+            ServiceLocator.Instance.RegisterService<IAnimationManager>(_animationManager);
+            
             _boardViewController = new BoardViewController(_gemParentContainer);
         }
 
         private void Update()
         {
             _boardViewController.RunLogic();
+        }
+        
+        private void LateUpdate()
+        {
+            _animationManager.Play();
         }
 
         #endregion

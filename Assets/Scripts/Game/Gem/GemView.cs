@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Common;
 using Containers;
+using Core.Animation.Interfaces;
 using Core.Service;
 using DG.Tweening;
 using Lean.Pool;
@@ -21,6 +22,7 @@ namespace Game.Gem
         #region Private Fields
         private SpriteRenderer _spriteRenderer;
         private static IBoardDrawHelper _boardDrawHelper;
+        private IAnimationManager _animationManager;
         #endregion
 
         #region Properties
@@ -36,24 +38,18 @@ namespace Game.Gem
     
         #endregion
 
-        private void OnEnable()
-        {
-            //Register events
-            
-        }
-
-        private void OnDisable()
-        {
-            //Unregister events
-        }
-
         public void SetGemData (GemData data)
         {
             if (_boardDrawHelper == null)
             {
                 _boardDrawHelper = ServiceLocator.Instance.Get<IBoardDrawHelper>();
             }
-            
+
+            if (_animationManager == null)
+            {
+                _animationManager = ServiceLocator.Instance.Get<IAnimationManager>();
+            }
+
             Data = data;
             _spriteRenderer.sprite = _gemContainer.Gems[(int)Data.Color];
             transform.position = _boardDrawHelper.GetWorldPosition(data.Position.x, data.Position.y);
@@ -64,16 +60,34 @@ namespace Game.Gem
 
         private void OnDestroyGem()
         {
-            Data.PositionChanged -= OnPositionChanged;
-            Data.DestroyGem -= OnDestroyGem;
-            LeanPool.Despawn(gameObject);
+            Sequence destroySequence = DOTween.Sequence().Pause();
+            destroySequence.Append(_spriteRenderer.DOFade(0, 0.4f));
+            destroySequence.OnComplete(() =>
+            {
+                Data.PositionChanged -= OnPositionChanged;
+                Data.DestroyGem -= OnDestroyGem;
+
+                Data = null;
+                
+                LeanPool.Despawn(gameObject);
+            });
+            
+            _animationManager.Enqueue(AnimGroup.Destroy, destroySequence);
         }
 
         private void OnPositionChanged(Point position)
         {
             Sequence positionChangedSequence = DOTween.Sequence().Pause().SetLink(gameObject); 
-            positionChangedSequence.Append(transform.DOMove(_boardDrawHelper.GetWorldPosition(position.x, position.y), 0.3f));
-            positionChangedSequence.Play();
+            positionChangedSequence.Append(transform.DOMove(_boardDrawHelper.GetWorldPosition(position.x, position.y), 0.4f).SetEase(Ease.OutCirc));
+
+            if (Data.IsSwapped)
+            {
+                _animationManager.Enqueue(AnimGroup.Gravity, positionChangedSequence);
+            }
+            else
+            {
+                _animationManager.Enqueue(AnimGroup.Swap, positionChangedSequence);
+            }
         }
 
         public void Select()
