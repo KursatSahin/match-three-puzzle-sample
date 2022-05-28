@@ -14,6 +14,7 @@ namespace Bootstrapper
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         public static void AfterAssembliesLoaded()
         {
+            DG.Tweening.DOTween.defaultRecyclable = true;
             DG.Tweening.DOTween.SetTweensCapacity(TweenersCapacity, SequencesCapacity);
             
             RegisterEventDispatcher();

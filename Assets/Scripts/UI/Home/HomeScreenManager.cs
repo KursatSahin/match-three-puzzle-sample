@@ -29,6 +29,8 @@ namespace UI.Home
     
         #endregion
 
+        #region Unity Events
+        
         private void OnEnable()
         {
             _playButton.onClick.AddListener(OnPlayButtonClicked);
@@ -41,6 +43,10 @@ namespace UI.Home
             _exitButton.onClick.RemoveListener(OnExitButtonClicked);
         }
 
+        #endregion
+
+        #region Private Functions
+        
         private void OnExitButtonClicked()
         {
 #if UNITY_EDITOR
@@ -59,5 +65,7 @@ namespace UI.Home
             AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(Strings.Scenes.Loading);
             await UniTask.WaitUntil(() => asyncOperation.isDone);
         }
+        
+        #endregion
     }
 }

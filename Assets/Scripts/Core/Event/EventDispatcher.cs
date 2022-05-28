@@ -4,8 +4,11 @@ namespace Core.Event
 {
     public class EventDispatcher : IEventDispatcher
     {
+        #region Private Fields
         private Dictionary<GameEventType, EventAction> _eventDictionary;
+        #endregion
 
+        #region Public Functions
         public void Subscribe(GameEventType gameEventType, EventAction listener)
         {
             if (_eventDictionary.TryGetValue(gameEventType, out EventAction listeners))
@@ -45,15 +48,9 @@ namespace Core.Event
         {
             _eventDictionary = new Dictionary<GameEventType, EventAction>();
         }
+        
+        #endregion
     }
 
-    public enum GameEventType : ushort
-    {
-        GameStart,
-        GameEnd,
-        
-        UpdateScore,
-        BlockInputHandler,
-        UnblockInputHandler,
-    }
+    
 }

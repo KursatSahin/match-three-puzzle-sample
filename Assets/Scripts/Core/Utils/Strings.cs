@@ -16,9 +16,10 @@
         public static class InGameUI
         {
             public const string RestartButtonText = "RESTART";
-            public const string ExitButtonText = "EXIT";
+            public const string HomeButtonText = "HOME";
+            public const string CongratsText = "CONGRATS!";
         }
-        
+
         public static class Scenes
         {
             public const string Home = "Home";

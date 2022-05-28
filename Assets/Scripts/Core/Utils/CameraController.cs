@@ -5,9 +5,11 @@ namespace Core.Utils
 {
     public class CameraController : MonoBehaviour
     {
-        #region Inspector
+        #region Inspector Fields
         [SerializeField] private Canvas _rootCanvas;
         #endregion
+
+        #region Private Fields
 
         private CanvasScaler _canvasScaler;
         private Vector2 _referenceResolution;
@@ -19,7 +21,10 @@ namespace Core.Utils
         private float _defaultAspect;
         private float _defaultWidthSize;
         
+        #endregion
 
+        #region Unity Events
+        
         private void Awake()
         {
             _camera = GetComponent<Camera>();
@@ -32,7 +37,11 @@ namespace Core.Utils
             
             SetCameraPosition();
         }
+        
+        #endregion
 
+        #region Private Methods
+        
         private void SetCameraPosition()
         {
             if (_camera.aspect <= _defaultAspect)
@@ -49,5 +58,6 @@ namespace Core.Utils
             var cameraTransform = _camera.transform;
             cameraTransform.position = new Vector3(cameraTransform.position.x, _camera.orthographicSize, DefaultPositionZ);
         }
+        #endregion
     }
 }

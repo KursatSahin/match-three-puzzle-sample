@@ -17,6 +17,11 @@ namespace Core.Animation.Interfaces
         void Play();
 
         /// <summary>
+        /// Resets the animation manager sequences and the main sequence
+        /// </summary>
+        void Reset();
+
+        /// <summary>
         /// Cancels the current sequence (Sequence will be completed immediately)
         /// </summary>
         UniTask Cancel();
@@ -25,21 +30,21 @@ namespace Core.Animation.Interfaces
         /// Waits for the animations complete
         /// </summary>
         UniTask Wait();
-        
+
         /// <summary>
         /// Appends a tween into swap sequence with starting time
         /// </summary>
+        /// <param name="animGroup"></param>
         /// <param name="tween">Tween</param>
         /// <param name="startingTime"></param>
-        void Enqueue(AnimGroup groupId, Tween tween, float startingTime = 0f);
-
+        void Enqueue(AnimGroup animGroup, Tween tween, float startingTime = 0f);
     }
-    
+
     public enum AnimGroup
     {
-        Gravity = 100,
-        Destroy = 200,
-        Swap = 300,
-        Rollback = 400,
+        Swap = 100,
+        Rollback = 200,
+        Destroy = 300,
+        Gravity = 400,
     }
 }

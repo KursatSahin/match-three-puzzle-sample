@@ -1,6 +1,6 @@
 ﻿using Common;
-using Core;
 using Core.Input;
+using Core.Service.Interfaces;
 using Game.Gem;
 using Lean.Pool;
 using UnityEngine;
@@ -8,12 +8,18 @@ using static Containers.ContainerFacade;
 
 namespace Game
 {
-    public class BoardViewController
+    public class BoardViewController : ITearDownService
     {
+        #region Private Fields
+        
         private BoardLogic _boardLogic;
         private GameObject _gemPrefab;
         private Transform _gemParentContainer;
         
+        #endregion
+
+        #region Public Functions
+
         public BoardViewController(Transform gemParentContainer)
         {
             _gemPrefab = PrefabContainer.GemPrefab;
@@ -21,9 +27,15 @@ namespace Game
 
             InputHandler.Tap += OnTap;
             InputHandler.Swipe += OnSwipe;
-            
+
             _boardLogic = new BoardLogic(BoardSettings, this);
             _boardLogic.Initialize();
+        }
+
+        public void TearDown()
+        {
+            InputHandler.Tap -= OnTap;
+            InputHandler.Swipe -= OnSwipe;
         }
 
         public void GenerateBoardView()
@@ -41,39 +53,42 @@ namespace Game
                 gemView.SetGemData(gemData);
             }
         }
-        
+
         public void RunLogic()
         {
             _boardLogic.FindMatchesAndClear();
             _boardLogic.SettleBoard();
             _boardLogic.FillEmptySlots();
         }
+        
+        #endregion
+
+        #region Private Functions
 
         private void OnSwipe(GemView gemView, Point swipeDirection)
         {
-            Debug.Log($"Swipe event received ({gemView.Data.Position}) with direction => ({swipeDirection})" );
+            Debug.Log($"Swipe event received ({gemView.Data.Position}) with direction => ({swipeDirection})");
 
             if (GemView.PreviousSelected != null)
             {
                 GemView.PreviousSelected.Deselect();
             }
-            
+
             Point toPosition = gemView.Data.Position + swipeDirection;
 
-            if (!IsPositionValid(toPosition))
-                return;
-            
+            if (!IsPositionValid(toPosition)) return;
+
             _boardLogic.SwapGems(gemView.Data, _boardLogic.Board[toPosition.y, toPosition.x]);
         }
 
         private bool IsPositionValid(Point position)
         {
-            if (position.x < 0 || position.x >= BoardSettings.boardWidth)
+            if (position.x < 0 || position.x >= BoardSettings.BoardWidth)
             {
                 return false;
             }
 
-            if (position.y < 0 || position.y >= BoardSettings.boardHeight)
+            if (position.y < 0 || position.y >= BoardSettings.BoardHeight)
             {
                 return false;
             }
@@ -84,7 +99,7 @@ namespace Game
         private void OnTap(GemView gemView)
         {
             Debug.Log($"Tap event received ({gemView.Data.Position})");
-            
+
             if (GemView.PreviousSelected == null)
             {
                 gemView.Select();
@@ -109,6 +124,8 @@ namespace Game
                 }
             }
         }
-
+        
+        #endregion
+        
     }
 }

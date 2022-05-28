@@ -4,6 +4,7 @@ using Common;
 using Containers;
 using Core.Animation.Interfaces;
 using Core.Service;
+using Core.Utils;
 using DG.Tweening;
 using Lean.Pool;
 using UnityEngine;
@@ -44,6 +45,8 @@ namespace Game.Gem
 
         #endregion
 
+        #region Public Functions
+
         public void SetGemData (GemData data)
         {
             if (_boardDrawHelper == null)
@@ -62,40 +65,6 @@ namespace Game.Gem
             
             Data.PositionChanged += OnPositionChanged;
             Data.DestroyGem += OnDestroyGem;
-        }
-
-        private void OnDestroyGem()
-        {
-            Sequence destroySequence = DOTween.Sequence().Pause().SetLink(gameObject);
-            destroySequence.Append(_spriteRenderer.DOFade(0, 0.4f));
-            destroySequence.OnComplete(() =>
-            {
-                LeanPool.Despawn(gameObject);
-            });
-            destroySequence.OnStart((() =>
-            {
-                Data.PositionChanged -= OnPositionChanged;
-                Data.DestroyGem -= OnDestroyGem;
-
-                Data = null;
-            }));
-
-            _animationManager.Enqueue(AnimGroup.Destroy, destroySequence);
-        }
-
-        private void OnPositionChanged(Point position)
-        {
-            Sequence positionChangedSequence = DOTween.Sequence().Pause().SetLink(gameObject); 
-            positionChangedSequence.Append(transform.DOMove(_boardDrawHelper.GetWorldPosition(position.x, position.y), 0.4f).SetEase(Ease.OutCirc));
-
-            if (Data.IsSwapped)
-            {
-                _animationManager.Enqueue(AnimGroup.Gravity, positionChangedSequence);
-            }
-            else
-            {
-                _animationManager.Enqueue(AnimGroup.Swap, positionChangedSequence);
-            }
         }
 
         public void Select()
@@ -124,12 +93,52 @@ namespace Game.Gem
             var adjacents = new List<Point>();
 
             if (Data.Position.x > 0)  adjacents.Add(new Point(Data.Position.x - 1, Data.Position.y));
-            if (Data.Position.x < BoardSettings.boardWidth - 1)  adjacents.Add(new Point(Data.Position.x + 1, Data.Position.y));
+            if (Data.Position.x < BoardSettings.BoardWidth - 1)  adjacents.Add(new Point(Data.Position.x + 1, Data.Position.y));
             if (Data.Position.y > 0)  adjacents.Add(new Point(Data.Position.x, Data.Position.y - 1));
-            if (Data.Position.y < BoardSettings.boardHeight - 1)  adjacents.Add(new Point(Data.Position.x, Data.Position.y + 1));
+            if (Data.Position.y < BoardSettings.BoardHeight - 1)  adjacents.Add(new Point(Data.Position.x, Data.Position.y + 1));
 
             return adjacents;
         }
+        
+        #endregion
 
+        #region Private Functions
+        
+        private void OnDestroyGem()
+        {
+            Sequence destroySequence = DOTween.Sequence().Pause().SetLink(gameObject);
+            destroySequence.Append(_spriteRenderer.DOFade(0, 0.4f));
+            destroySequence.OnComplete(() =>
+            {
+                LeanPool.Despawn(gameObject);
+            });
+            destroySequence.OnStart((() =>
+            {
+                Data.PositionChanged -= OnPositionChanged;
+                Data.DestroyGem -= OnDestroyGem;
+
+                Data = null;
+            }));
+
+            _animationManager.Enqueue(AnimGroup.Destroy, destroySequence);
+        }
+
+        private void OnPositionChanged(Point position, float durationFactor)
+        {
+            Sequence positionChangedSequence = DOTween.Sequence().Pause().SetLink(gameObject);
+            positionChangedSequence.Append(transform.DOMove(_boardDrawHelper.GetWorldPosition(position.x, position.y), 0.4f * durationFactor).SetEase(Ease.OutCirc));
+
+            if (Data.IsSwapped)
+            {
+                _animationManager.Enqueue(AnimGroup.Gravity, positionChangedSequence);
+            }
+            else
+            {
+                _animationManager.Enqueue(AnimGroup.Swap, positionChangedSequence);
+            }
+        }
+
+        #endregion
+        
     }
 }

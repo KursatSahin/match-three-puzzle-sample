@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using Core.Animation.Interfaces;
+using Core.Event;
+using Core.Service;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 
@@ -7,58 +9,121 @@ namespace Core.Animation
 {
     public class AnimationManager : IAnimationManager
     {
-        private SortedDictionary<int, Sequence> _subsequences = new SortedDictionary<int, Sequence>();
+        #region Private Fields
+
+        private Queue<Tween> _mainSequence = new Queue<Tween>();
+
+        private Sequence _swapSequence;
+        private Sequence _destroySequence;
+        private Sequence _gravitySequence;
+        private Sequence _rollbackSequence;
+
+        private IEventDispatcher _eventDispatcher;
         
-        private Sequence _mainSequence;
+        #endregion
 
-        public bool IsPlaying => _mainSequence != null;
+        #region Properties
+        public bool IsPlaying
+        {
+            get
+            {
+                if (_mainSequence.Count < 1)
+                    return false;
+                var current = _mainSequence.Peek();
+                return (current != null) && _mainSequence.Peek().IsPlaying();
+            }
+        }
         
-        public void Enqueue(AnimGroup groupId, Tween tween, float startingTime = 0f)
+        #endregion
+        
+        #region Publlic Functions
+        
+        public AnimationManager()
         {
-            var sequence = GetSequence((int)groupId);
-
-            sequence.Insert(startingTime, tween);
+            _eventDispatcher = ServiceLocator.Instance.Get<IEventDispatcher>();
         }
 
-        public void EnqueueInterval(AnimGroup groupId, float interval)
+        public void Enqueue(AnimGroup animGroup, Tween tween, float startingTime = 0f)
         {
-            var sequence = GetSequence((int)groupId);
-
-            sequence.AppendInterval(interval);
+            switch (animGroup)
+            {
+                case AnimGroup.Swap:
+                    EnqueueSwap(tween, startingTime);
+                    break;
+                case AnimGroup.Destroy:
+                    EnqueueDestroy(tween, startingTime);
+                    break;
+                case AnimGroup.Gravity:
+                    EnqueueGravity(tween, startingTime);
+                    break;
+                case AnimGroup.Rollback:
+                    EnqueueRollback(tween, startingTime);
+                    break;
+            }
         }
-
-        public void EnqueueCallback(AnimGroup groupId, TweenCallback callback, float startingTime = 0f)
+        
+        public void Reset()
         {
-            var sequence = GetSequence((int)groupId);
-            
-            sequence.InsertCallback(startingTime, callback);
-        }
-
-        public void Play()
-        {
-            if (_subsequences.Count == 0 || _mainSequence != null)
+            if (_swapSequence == null && _destroySequence == null && _gravitySequence == null && _rollbackSequence == null)
             {
                 return;
             }
 
-            _mainSequence = DOTween.Sequence();
-            _mainSequence.onKill += () => { _mainSequence = null; };
-            foreach (var sequence in _subsequences.Values)
+            var sequence = DOTween.Sequence().Pause();
+            if (_gravitySequence != null)
             {
-                _mainSequence.Append(sequence);
+                sequence.Append(_gravitySequence);
             }
+            if (_destroySequence != null)
+            {
+                sequence.Append(_destroySequence);
+            }
+            if (_swapSequence != null)
+            {
+                sequence.Append(_swapSequence);
+            }
+            if (_rollbackSequence != null)
+            {
+                sequence.Append(_rollbackSequence);
+            }
+            
+            _mainSequence.Enqueue(sequence);
 
-            _mainSequence.Play();
+            _gravitySequence = null;
+            _destroySequence = null;
+            _swapSequence = null;
+            _rollbackSequence = null;
+        }
+
+        public void Play()
+        {
+            if (_mainSequence.Count > 0 && !_mainSequence.Peek().IsPlaying())
+            {
+                _mainSequence.Peek().Play().OnComplete(() =>
+                {
+                    _mainSequence.Dequeue();
+                    if (_mainSequence.Count < 1)
+                    {
+                        _eventDispatcher.Fire(GameEventType.UnblockInputHandler);
+                    }
+                });
+            }
         }
 
         public async UniTask Cancel()
         {
             await UniTask.Yield();
+            
+            if (_mainSequence.Count < 1)
+                return;
 
-            _mainSequence.Goto(float.MaxValue);
-            _mainSequence = null;
+            var currentSubSequence = _mainSequence.Peek();
+            
+            if (currentSubSequence.IsPlaying())
+                return;
 
-            _subsequences.Clear();
+            currentSubSequence.Goto(float.MaxValue);
+            _mainSequence.Clear();
 
             await UniTask.Yield();
         }
@@ -75,28 +140,50 @@ namespace Core.Animation
             }
         }
         
-        /// <summary>
-        /// Get related sequence or create a new one
-        /// </summary>
-        /// <param name="groupId"></param>
-        /// <returns></returns>
-        private Sequence GetSequence(int groupId)
+        #endregion
+
+        #region Private Functions
+
+        private void EnqueueGravity(Tween tween, float startingTime = 0f)
         {
-            if (!_subsequences.TryGetValue(groupId, out Sequence sequence))
+            if (_gravitySequence == null)
             {
-                sequence = DOTween.Sequence().Pause();
-                sequence.intId = groupId;
-                sequence.onKill = () => { _subsequences.Remove(sequence.intId); };
+                _gravitySequence = DOTween.Sequence().Pause();
             }
 
-            _subsequences[groupId] = sequence;
-
-            return sequence;
+            _gravitySequence.Insert(startingTime, tween);
         }
 
-        public void Initialize()
+        private void EnqueueDestroy(Tween tween, float startingTime = 0f)
         {
-            
+            if (_destroySequence == null)
+            {
+                _destroySequence = DOTween.Sequence().Pause();
+            }
+
+            _destroySequence.Insert(startingTime, tween);
         }
+
+        private void EnqueueSwap(Tween tween, float startingTime = 0f)
+        {
+            if (_swapSequence == null)
+            {
+                _swapSequence = DOTween.Sequence().Pause();
+            }
+
+            _swapSequence.Insert(startingTime, tween);
+        }
+
+        private void EnqueueRollback(Tween tween, float startingTime = 0f)
+        {
+            if (_rollbackSequence == null)
+            {
+                _rollbackSequence = DOTween.Sequence().Pause();
+            }
+        
+            _rollbackSequence.Insert(startingTime, tween);
+        }
+        
+        #endregion
     }
 }

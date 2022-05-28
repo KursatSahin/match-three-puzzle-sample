@@ -1,5 +1,6 @@
 ﻿using System;
 using Common;
+using Core.Animation.Interfaces;
 using Core.Event;
 using Core.Service;
 using Core.Utils;
@@ -9,39 +10,56 @@ using UnityEngine;
 
 namespace Core.Input
 {
-    public class InputHandler : MonoBehaviour
+    public class InputHandler : IInputHandler
     {
+        #region Static Fileds
         public static event Action<GemView> Tap;
         public static event Action<GemView, Point> Swipe;
         
+        #endregion
+
+        #region Private Fields
         private Camera _mainCamera;
 
         private bool _isBlocked = false;
         
         private IEventDispatcher _eventDispatcher;
+        private IAnimationManager _animationManager;
+        
+        #endregion
 
-        private void Awake()
+        #region Public Functions
+        
+        public InputHandler()
         {
             _mainCamera = Camera.main;
             _eventDispatcher = ServiceLocator.Instance.Get<IEventDispatcher>();
+            _animationManager = ServiceLocator.Instance.Get<IAnimationManager>();
+            _isBlocked = true;
         }
-
-        private void OnEnable()
+        
+        public void Initialize()
         {
             LeanTouch.OnFingerTap += OnFingerTap;
             LeanTouch.OnFingerSwipe += OnFingerSwipe;
             _eventDispatcher.Subscribe(GameEventType.BlockInputHandler, OnBlockInputHandler);
             _eventDispatcher.Subscribe(GameEventType.UnblockInputHandler, OnUnblockInputHandler);
+            
+            _isBlocked = false;
         }
-
-        private void OnDisable()
+        
+        public void TearDown()
         {
             LeanTouch.OnFingerTap -= OnFingerTap;
             LeanTouch.OnFingerSwipe -= OnFingerSwipe;
             _eventDispatcher.Unsubscribe(GameEventType.BlockInputHandler, OnBlockInputHandler);
             _eventDispatcher.Unsubscribe(GameEventType.UnblockInputHandler, OnUnblockInputHandler);
         }
+        
+        #endregion
 
+        #region Private Functions
+        
         private void OnFingerSwipe(LeanFinger finger)
         {
             if (_isBlocked) return;
@@ -83,17 +101,13 @@ namespace Core.Input
             _isBlocked = false;
         }
 
-        private void OnBlockInputHandler(IEvent e)
+        private async void OnBlockInputHandler(IEvent e)
         {
             _isBlocked = true;
+
+            await _animationManager.Wait();
         }
-    }
-    
-    public enum Directions
-    {
-        Up,
-        Down,
-        Left,
-        Right
+        
+        #endregion
     }
 }

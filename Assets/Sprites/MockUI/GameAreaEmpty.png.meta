@@ -1,7 +1,19 @@
 fileFormatVersion: 2
 guid: 3a6bf02b83181ec44b15886d313c99d0
 TextureImporter:
-  internalIDToNameTable: []
+  internalIDToNameTable:
+  - first:
+      213: -6054990943341743612
+    second: "Upper_W\u0131reframe"
+  - first:
+      213: 5226474989303379385
+    second: Board_Area_Wireframe
+  - first:
+      213: -6638382265145324793
+    second: "Upper_F\u0131ller"
+  - first:
+      213: 1756164866918299239
+    second: Bottom_Filler
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -41,7 +53,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -125,7 +137,91 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: "Upper_W\u0131reframe"
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 798
+        width: 800
+        height: 478
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 40278e751d958fba0800000000000000
+      internalID: -6054990943341743612
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Board_Area_Wireframe
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 4
+        width: 800
+        height: 794
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9b534eccf4b288840800000000000000
+      internalID: 5226474989303379385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Upper_F\u0131ller"
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1276
+        width: 800
+        height: 4
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 70b82c2608abfd3a0800000000000000
+      internalID: -6638382265145324793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bottom_Filler
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 800
+        height: 4
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 766bfa354a62f5810800000000000000
+      internalID: 1756164866918299239
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []

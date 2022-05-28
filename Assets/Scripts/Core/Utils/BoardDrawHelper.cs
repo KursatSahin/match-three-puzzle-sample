@@ -1,15 +1,20 @@
 ﻿using Core.Service.Interfaces;
 using UnityEngine;
 
-namespace Utils
+namespace Core.Utils
 {
     public class BoardDrawHelper : IBoardDrawHelper
     {
-        public static float GemTransformScaleX = .92f;
-        public static float GemTransformScaleY = .92f;
+        #region Private Fields
+        
+        private const float GemTransformScaleX = .92f;
+        private const float GemTransformScaleY = .92f;
 
         private Vector3 _boardPivot;
 
+        #endregion
+
+        #region Public Methods
         public BoardDrawHelper(Transform boardPivot)
         {
             _boardPivot = boardPivot.position;
@@ -19,11 +24,8 @@ namespace Utils
         {
             return new Vector3(_boardPivot.x + GemTransformScaleX * x, _boardPivot.y + GemTransformScaleY * y);
         }
-
-        public void Initialize()
-        {
-            // no need to implement
-        }
+        
+        #endregion
     }
     
     public interface IBoardDrawHelper : IService

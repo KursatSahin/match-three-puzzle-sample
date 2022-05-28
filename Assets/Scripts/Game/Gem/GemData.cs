@@ -1,11 +1,12 @@
 ﻿using System;
 using Common;
+using UnityEngine;
 
 namespace Game.Gem
 {
     public class GemData
     {
-        public Action<Point> PositionChanged;
+        public Action<Point, float> PositionChanged;
         public Action DestroyGem;
         
         private Point _position;
@@ -22,8 +23,10 @@ namespace Game.Gem
             {
                 if (_position != value)
                 {
+                    var diff = Math.Max(_position.y - 8, 1);
+                    var durationFactor = 1 + Mathf.Log(diff);
                     _position = value;
-                    PositionChanged?.Invoke(value);
+                    PositionChanged?.Invoke(value, durationFactor);
                 }
             }
         }

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using Common;
 using Containers;
+using Core.Event;
+using Core.Service;
 using Game.Gem;
 using UnityEngine;
 
@@ -8,10 +10,17 @@ namespace Game
 {
     public class BoardLogic
     {
+        #region Public Fields
         public GemData [,] Board { get; private set; }
+        
+        #endregion
+
+        #region Private Fields
         
         private BoardSettingsContainer _boardSettings;
         private BoardViewController _boardViewController;
+        private IEventDispatcher _eventDispatcher;
+        
         private List<GemData> _destroyedCollector = new List<GemData>();
 
         private List<int> _gemColors = new List<int>() {0, 1, 2, 3, 4};
@@ -20,21 +29,27 @@ namespace Game
         private int _previousBelow;
         
         private bool _isBoardModified = false;
-        private bool _isRollBackNeeded = true;
+        
+        #endregion
+
+        #region Public Functions
 
         public BoardLogic(BoardSettingsContainer boardSettings, BoardViewController boardViewController)
         {
             _boardSettings = boardSettings;
             _boardViewController = boardViewController;
+            _eventDispatcher = ServiceLocator.Instance.Get<IEventDispatcher>();
         }
 
         public void Initialize()
         {
-            GenerateBoard(_boardSettings.boardWidth, _boardSettings.boardHeight);
+            GenerateBoard(_boardSettings.BoardWidth, _boardSettings.BoardHeight);
         }
         
         public void SwapGems(GemData firstGem, GemData secondGem)
         {
+            _eventDispatcher.Fire(GameEventType.BlockInputHandler);
+
             Board[firstGem.Position.y, firstGem.Position.x] = secondGem;
             Board[secondGem.Position.y, secondGem.Position.x] = firstGem;
          
@@ -62,7 +77,7 @@ namespace Game
             if (!_isBoardModified)
                 return;
 
-            _isRollBackNeeded = true;
+            var _isRollBackNeeded = true;
             
             var modifiedGems = GetModifiedGems();
             
@@ -83,7 +98,7 @@ namespace Game
                     }
                 }
 
-                _isRollBackNeeded = _isRollBackNeeded && (gem.IsSwapped && !isMatchFound);;
+                _isRollBackNeeded = _isRollBackNeeded && (gem.IsSwapped && !isMatchFound);
                 
                 gem.IsSwapped = false;
                 gem.IsModified = false;
@@ -113,7 +128,7 @@ namespace Game
                 int fallingDistance = 0;
 
                 // Traverse the column from bottom to top
-                for (int row = 0; row < _boardSettings.boardHeight; row++)
+                for (int row = 0; row < _boardSettings.BoardHeight; row++)
                 {
                     var gemData = Board[row, column];
 
@@ -152,9 +167,9 @@ namespace Game
 
             foreach (var column in emptyColumns)
             {
-                var generatorRowIndex = _boardSettings.boardHeight;
+                var generatorRowIndex = _boardSettings.BoardHeight;
 
-                for (int row = 0; row < _boardSettings.boardHeight; row++)
+                for (int row = 0; row < _boardSettings.BoardHeight; row++)
                 {
                     var gemData = Board[row, column];
 
@@ -174,9 +189,14 @@ namespace Game
                 }
             }
             
+            _eventDispatcher.Fire(GameEventType.UpdateScore, new ScoreUpdateEvent( _destroyedCollector.Count));
             _destroyedCollector.Clear();
             _isBoardModified = true;
         }
+
+        #endregion
+
+        #region Private Functions
 
         private void GenerateBoard(int boardWidth, int boardHeight)
         {
@@ -228,7 +248,7 @@ namespace Game
             GemData next;
             
             List<GemData> horizontalMatches = new List<GemData>{current};
-            List<GemData> verticalMatches = new List<GemData>{current};;
+            List<GemData> verticalMatches = new List<GemData>{current};
 
             if (current.Position.x > 0)
             {
@@ -238,7 +258,7 @@ namespace Game
                     CheckGemForMatchHelper(next, Point.Left, horizontalMatches);
             }
 
-            if (current.Position.x < _boardSettings.boardWidth - 1)
+            if (current.Position.x < _boardSettings.BoardWidth - 1)
             {
                 nextPosition = current.Position + Point.Right;
                 next = Board[nextPosition.y, nextPosition.x];
@@ -254,7 +274,7 @@ namespace Game
                     CheckGemForMatchHelper(next, Point.Down, verticalMatches);
             }
 
-            if (current.Position.y < _boardSettings.boardHeight - 1)
+            if (current.Position.y < _boardSettings.BoardHeight - 1)
             {
                 nextPosition = current.Position + Point.Up;
                 next = Board[nextPosition.y, nextPosition.x];
@@ -263,18 +283,18 @@ namespace Game
             }
 
             horizontalMatches.RemoveAt(0);
-            if (horizontalMatches.Count >= _boardSettings.minSolutionLength-1)
+            if (horizontalMatches.Count >= _boardSettings.MinSolutionLength-1)
             {
                 result.AddRange(horizontalMatches);
             }
 
             verticalMatches.RemoveAt(0);
-            if (verticalMatches.Count >= _boardSettings.minSolutionLength-1)
+            if (verticalMatches.Count >= _boardSettings.MinSolutionLength-1)
             {
                 result.AddRange(verticalMatches);
             }
             
-            return result.Count >= _boardSettings.minSolutionLength;
+            return result.Count >= _boardSettings.MinSolutionLength;
         }
         
         private void CheckGemForMatchHelper(GemData gem, Point direction, List<GemData> result)
@@ -284,7 +304,7 @@ namespace Game
             
             var nextPosition = current.Position + direction;
             
-            if (nextPosition.x < 0 || nextPosition.x >= _boardSettings.boardWidth || nextPosition.y < 0 || nextPosition.y >= _boardSettings.boardHeight)
+            if (nextPosition.x < 0 || nextPosition.x >= _boardSettings.BoardWidth || nextPosition.y < 0 || nextPosition.y >= _boardSettings.BoardHeight)
                 return;
             
             var next = Board[nextPosition.y, nextPosition.x];
@@ -308,5 +328,7 @@ namespace Game
             }
             return result;
         }
+        #endregion
     }
+
 }

@@ -5,7 +5,7 @@ namespace Core.Event
 {
     public delegate void EventAction(IEvent e);
 
-    public interface IEventDispatcher : IService
+    public interface IEventDispatcher : IService, IInitializeService
     {
         void Subscribe(GameEventType gameEventType, EventAction listener);
         void Unsubscribe(GameEventType gameEventType, EventAction listener);
