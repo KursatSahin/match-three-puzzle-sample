@@ -12,7 +12,7 @@ namespace Core.Animation.Interfaces
         bool IsPlaying { get; }
 
         /// <summary>
-        /// Creates a main sequence for all the created sequences in the queue then plays it
+        /// Plays tween in animation queue until it is finished
         /// </summary>
         void Play();
 

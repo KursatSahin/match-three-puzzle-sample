@@ -31,20 +31,30 @@ namespace Game
         {
             _eventDispatcher = ServiceLocator.Instance.Get<IEventDispatcher>();
             _remainingTime = _totalTime;
+            
+            // Timer starts automatically
             Play();
         }
 
         void Update()
         {
+            // Check if timer is running
             if (_timerIsRunning)
             {
+                // We need to use this calculation with -Time.realtimeSinceStartup- because of avoiding sync issues when lose onfocus
+                
+                // Calculate remaining time
                 _remainingTime = _endTime - Time.realtimeSinceStartup;
+                
+                // Update remaining time text
                 _remainingTimeText.text = $"{(int) Mathf.Clamp(Mathf.Ceil(_remainingTime), 0, _totalTime)}";
 
                 if (_remainingTime <= 0)
                 {
                     _timerIsRunning = false;
                     _remainingTimeText.text = "0";
+                    
+                    // Send event to notify that game is finished
                     _eventDispatcher.Fire(GameEventType.GameEnd);
                 }
             }
@@ -53,18 +63,26 @@ namespace Game
         #endregion
 
         #region Public Functions
-        
+        /// <summary>
+        /// Finds the end time by adding the remaining time to the current time
+        /// </summary>
+        /// <param name="remainingTime"></param>
         public void SetRemainingTime(float remainingTime)
         {
             _endTime = Time.realtimeSinceStartup + _remainingTime;
         }
         
+        /// <summary>
+        /// Play the timer
+        /// </summary>
         public void Play()
         {
             SetRemainingTime(_remainingTime);
             _timerIsRunning = true;
         }
-        
+        /// <summary>
+        /// Stop the timer
+        /// </summary>
         public void Pause()
         {
             _timerIsRunning = false;

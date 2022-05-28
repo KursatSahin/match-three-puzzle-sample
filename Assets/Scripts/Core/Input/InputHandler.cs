@@ -59,7 +59,10 @@ namespace Core.Input
         #endregion
 
         #region Private Functions
-        
+        /// <summary>
+        /// OnFingerSwipe event handler
+        /// </summary>
+        /// <param name="finger"></param>
         private void OnFingerSwipe(LeanFinger finger)
         {
             if (_isBlocked) return;
@@ -74,6 +77,10 @@ namespace Core.Input
             if (swipe.y > Mathf.Abs(swipe.x)) Swipe?.Invoke(gemView, Point.Up);
         }
 
+        /// <summary>
+        /// OnFingerTap event handler
+        /// </summary>
+        /// <param name="finger"></param>
         private void OnFingerTap(LeanFinger finger)
         {
             if (_isBlocked) return;
@@ -84,6 +91,11 @@ namespace Core.Input
             Tap?.Invoke(gemView);
         }
         
+        /// <summary>
+        /// Get gem view by hit by finger
+        /// </summary>
+        /// <param name="finger"></param>
+        /// <returns></returns>
         private GemView GetGem(LeanFinger finger)
         {
             var hit = Physics2D.Raycast(_mainCamera.ScreenPointToRay(finger.StartScreenPosition).origin, Vector2.zero);
@@ -96,11 +108,19 @@ namespace Core.Input
             return null;
         }
         
+        /// <summary>
+        /// OnUnblockInput event handler
+        /// </summary>
+        /// <param name="e"></param>
         private void OnUnblockInputHandler(IEvent e)
         {
             _isBlocked = false;
         }
 
+        /// <summary>
+        /// OnBlockInput event handler
+        /// </summary>
+        /// <param name="e"></param>
         private async void OnBlockInputHandler(IEvent e)
         {
             _isBlocked = true;

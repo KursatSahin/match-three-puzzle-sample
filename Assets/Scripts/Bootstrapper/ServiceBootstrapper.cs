@@ -11,6 +11,9 @@ namespace Bootstrapper
         
         private static readonly ServiceLocator _serviceLocator = ServiceLocator.Instance;
 
+        /// <summary>
+        /// This function is called AfterAssembliesLoaded automatically with this attribute
+        /// </summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         public static void AfterAssembliesLoaded()
         {

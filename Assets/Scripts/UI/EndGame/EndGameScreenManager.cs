@@ -48,11 +48,17 @@ namespace UI.EndGame
 
         #region Private Functions
         
+        /// <summary>
+        /// Restart button OnClick event handler
+        /// </summary>
         private void OnRestartButtonClicked()
         {
             SceneManager.LoadScene(Strings.Scenes.Game);
         }
 
+        /// <summary>
+        /// Home button OnClick event handler
+        /// </summary>
         private void OnHomeButtonClicked()
         {
             SceneManager.LoadScene(Strings.Scenes.Home);

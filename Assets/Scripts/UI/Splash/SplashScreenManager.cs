@@ -45,27 +45,44 @@ namespace UI.Splash
             GameTitleAnim();
         }
 
+        /// <summary>
+        /// Creates a animation tween for the game title and starts
+        /// </summary>
         private void GameTitleAnim()
         {
             Sequence sequence = DOTween.Sequence().Pause().SetLink(gameObject);
         
             sequence.OnStart((() =>
             {
+                // Set starting position
                 var gameTitleStartingPosOffset = ((float) Screen.height / 2) + _gameTitle.rectTransform.rect.height;
                 _gameTitle.rectTransform.anchoredPosition = new Vector2(0, gameTitleStartingPosOffset);
+                
+                // Game title visible
                 _gameTitle.gameObject.SetActive(true);
             }));
+            
+            // Fall game title down
             sequence.Append(_gameTitle.rectTransform.DOAnchorPosY(0f, _gameTitleAnimDuration).SetEase(_gameTitleAnimEaseType));
+            
+            // Set loading bar visible
             sequence.AppendCallback(() =>
             {
                 _loadingbarSlider.gameObject.SetActive(true);
             });
+            
+            // Loading filling bar animation
             sequence.Append(_loadingbarSlider.DOValue(100, _loadingbarAnimDuration).SetEase(Ease.OutCirc));
+            
+            // Loading home screen after complete
             sequence.OnComplete(LoadHomeScene);
 
             sequence.Play();
         }
 
+        /// <summary>
+        /// Loading home screen asynchronously
+        /// </summary>
         private async void LoadHomeScene()
         {
             AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(Strings.Scenes.Home);
@@ -73,6 +90,10 @@ namespace UI.Splash
             await UniTask.WaitUntil(() => asyncOperation.isDone);
         }
     
+        /// <summary>
+        /// Display loading percentage on loading bar
+        /// </summary>
+        /// <param name="sliderValue">Loading percent</param>
         private void OnLoadingBarValueChanged(float sliderValue)
         {
             _loadingbarSliderText.text = $"Loading... {(int)sliderValue}%";

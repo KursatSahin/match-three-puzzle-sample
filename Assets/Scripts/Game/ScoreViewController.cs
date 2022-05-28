@@ -37,18 +37,24 @@ namespace Game
         
         private void OnEnable()
         {
+            // Set service locator and subscribe to events
             _eventDispatcher = ServiceLocator.Instance.Get<IEventDispatcher>();
             _eventDispatcher.Subscribe(GameEventType.UpdateScore, OnUpdateScore);
         }
 
         private void OnDisable()
         {
+            // Unsubscribe from events
             _eventDispatcher.Subscribe(GameEventType.UpdateScore, OnUpdateScore);
         }
 
         #endregion
         
         #region Private Functions
+        /// <summary>
+        /// Score update event handler
+        /// </summary>
+        /// <param name="e"></param>
         private void OnUpdateScore(IEvent e)
         {
             ScoreUpdateEvent scoreUpdateEvent = e as ScoreUpdateEvent; 

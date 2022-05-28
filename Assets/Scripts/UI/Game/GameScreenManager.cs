@@ -1,4 +1,3 @@
-using System;
 using Core.Animation;
 using Core.Animation.Interfaces;
 using Core.Event;
@@ -34,34 +33,42 @@ namespace UI.Game
         
         private void Start()
         {
+            // Create ands initialize BoardDrawHelper service, and register it to the ServiceLocator
             var boardDrawHelper = new BoardDrawHelper(_boardPivotPoint);
             ServiceLocator.Instance.RegisterService<IBoardDrawHelper>(boardDrawHelper);
 
+            // Create ands initialize AnimationManager service, and register it to the ServiceLocator
             _animationManager = new AnimationManager();
             ServiceLocator.Instance.RegisterService<IAnimationManager>(_animationManager);
             
+            // Create ands initialize InputHandler service, and register it to the ServiceLocator
             _inputHandler = new InputHandler();
             ServiceLocator.Instance.RegisterService<IInputHandler>(_inputHandler);
             _inputHandler.Initialize();
             
+            // Create ands initialize BoardViewController
             _boardViewController = new BoardViewController(_gemParentContainer);
 
+            // Subscribe to events
             SubscribeEvents();
         }
-
+        
         private void Update()
         {
+            // Run board logic every frame
             _boardViewController.RunLogic();
         }
         
         private void LateUpdate()
         {
+            // Run animation manager every frame (after board logic), to make sure if any animations remain in animation queue
             _animationManager.Play();
             _animationManager.Reset();
         }
 
         private void OnDestroy()
         {
+            // Clean up
             _inputHandler.TearDown();
             _boardViewController.TearDown();
             DOTween.KillAll();

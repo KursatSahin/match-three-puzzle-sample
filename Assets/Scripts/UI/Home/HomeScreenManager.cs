@@ -47,6 +47,9 @@ namespace UI.Home
 
         #region Private Functions
         
+        /// <summary>
+        /// Exit button OnClick event handler
+        /// </summary>
         private void OnExitButtonClicked()
         {
 #if UNITY_EDITOR
@@ -55,11 +58,17 @@ namespace UI.Home
             Application.Quit();
         }
 
+        /// <summary>
+        /// Play button OnClick event handler
+        /// </summary>
         private void OnPlayButtonClicked()
         {
             LoadLoadingScene();
         }
     
+        /// <summary>
+        /// 
+        /// </summary>
         private async void LoadLoadingScene()
         {
             AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(Strings.Scenes.Loading);
